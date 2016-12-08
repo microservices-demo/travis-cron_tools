@@ -1,0 +1,46 @@
+digraph spawn_travis_build_architect {
+//  edge[minlen=2];
+
+  travis_cron_trigger[label="Travis daily\ncron service",style="filled", color="#90305A", fontcolor=white];
+
+  {
+    rank=same;
+    github[shape="hexagon", label="GitHub\nrepository", style="filled", color="#6FA698", fontcolor=white];
+    travis_cron_job[shape="egg", label="Travis Build\n(Cron Job)", style="filled", color="#D890B0", fontcolor=white];
+    docker_registry[shape="hexagon", label="Docker\nregistry", style="filled", color="#6FA698", fontcolor=white];
+    travis_api[shape="hexagon", label="Travis API", style="filled", color="#6FA698", fontcolor=white];
+    docker_registry -> travis_cron_job [constraints=false, style=invis];
+    github -> travis_api [style=invis];
+  }
+
+  travis_cron_trigger -> travis_cron_job [label="1. triggers"];
+
+  travis_cron_job -> determine_changes;
+  docker_registry -> determine_changes[dir=back, label="3a. Pull images"];
+  determine_changes -> github[label="3b. Pull current master"];
+  travis_api -> determine_changes[dir=back, label="3c. Determine last\nsuccessful build"];
+
+
+  subgraph cluster_cron_job_content {
+    margin=20;
+    determine_changes[label="2. Determine changes\n(with DSL)"];
+    compute_tests_to_run[label="4.Filter tests to run\n(custom logic)"];
+    spawn_travis_build[label="5. Spawn Travis Build"];
+  }
+
+
+  determine_changes -> compute_tests_to_run[label="Changed repos &\nDocker images"];
+  compute_tests_to_run -> spawn_travis_build;
+
+  travis_build[shape=egg,label="Travis Build\n(only with relevant tests)", style="filled", color="#D890B0", fontcolor=white];
+
+  travis_job1[label="Test A", style="filled", fillcolor="#D890B0"];
+  travis_job2[label="Test B", style="filled", fillcolor="#D890B0"];
+  travis_job3[label="Test C", color="grey", fontcolor="grey", fontcolor="black"];
+
+  spawn_travis_build -> travis_build;
+
+  travis_build -> travis_job1;
+  travis_build -> travis_job2;
+  travis_build -> travis_job3 [color="grey",style="dotted"];
+}
