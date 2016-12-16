@@ -12,6 +12,7 @@ module Travis
 
           # Extract the image name, and append ':latest', unless a tag has already been provided.
           images += yaml_parts\
+            .select { |part| !! part } \
             .select { |part| part["kind"] == "Deployment" }\
             .map { |part| part["spec"]["template"]["spec"]["containers"].map { |c| c["image"] } }.flatten\
             .map { |name| if name.include?(":") then name; else name + ":latest"; end }
