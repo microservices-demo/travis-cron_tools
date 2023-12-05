@@ -1,4 +1,4 @@
-# Travis CronTools 
+# DEPRECATED: Travis CronTools 
 
 This gem provides a library to (conditionally) spawn Travis Builds, each potentially
 consisting of multiple jobs.
